@@ -31,14 +31,14 @@ async function combinePlaylist(www) {
         let content = await fse.readFile(files[i], 'utf8');
         let lines = content.trim().split('\n');
         if (i === 0) {
-            result = result.concat(lines.slice(0, -1));
+            result = result.concat(lines.slice(0, 4));
         }
-        else if (i === files.length - 1) {
-            result = result.concat(lines.slice(4));
-        }
-        else {
-            result = result.concat(lines.slice(4, -1));
+
+        result = result.concat(lines.slice(4, -1));
+
+        if (i === files.length - 1) {
+            result = result.concat(lines.slice(-1));
         }
     }
-    return result.join('\n');
+    return result.concat('').join('\n');
 }

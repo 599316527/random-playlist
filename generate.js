@@ -43,7 +43,9 @@ function getCommand(file, targetDir) {
     }
     parameters = parameters.concat([
         '-i', file,
-        ...(`-c:v libx264 -tune stillimage -crf 23 -profile:v high -level 4.1 -pix_fmt yuv420p -s 64x64 -c:a aac -ac 1 -strict -2 -b:a 192k -shortest -start_number 0 -hls_time 10 -hls_list_size 0 -f hls`.split(/\s+/)),
+        // ...('-c:v libx264 -tune stillimage -crf 23 -profile:v high -level 4.1 -pix_fmt yuv420p -c:a aac -ac 1 -strict -2 -b:a 192k'.split(/\s+/)),
+        ...('-c:v mpeg2video -qscale:v 2 -c:a mp2 -b:a 192k'.split(/\s+/)),
+        ...('-s 64x64 -shortest -start_number 0 -hls_time 10 -hls_list_size 0 -f hls'.split(/\s+/)),
         '-hls_segment_filename', `${targetPath}/file%03d.ts`,
         '-hls_base_url', `${key}/`,
         `${targetPath}.m3u8`

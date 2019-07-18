@@ -2,14 +2,20 @@ const fse = require('fs-extra');
 const path = require('path');
 const {shuffle} = require('lodash');
 const express = require('express');
-const serve   = require('express-static');
+const serve = require('express-static');
+const cors = require('express-cors');
 
 exports.getServer = function (www) {
     let app = express();
 
+    app.use(cors({
+        allowedOrigins: [
+            '*.gstatic.com'
+        ]
+    }));
+
     app.get('/random.m3u8', async function (req, res) {
         res.header({
-            'Access-Control-Allow-Origin': '*',
             'Cache-Control': 'no-cache'
         });
         res.type('.m3u8').send(await combinePlaylist(www));
@@ -38,6 +44,9 @@ async function combinePlaylist(www) {
 
         if (i === files.length - 1) {
             result = result.concat(lines.slice(-1));
+        }
+        else {
+            result.push('#EXT-X-DISCONTINUITY');
         }
     }
     return result.concat('').join('\n');

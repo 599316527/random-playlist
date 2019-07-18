@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "bin": {
-    "random-playlist" : "./cli.js"
+    "random-playlist": "./cli.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,6 +14,7 @@
   "dependencies": {
     "await-spawn": "^2.1.2",
     "express": "^4.17.1",
+    "express-cors": "0.0.3",
     "express-static": "^1.2.6",
     "fs-extra": "^8.1.0",
     "lodash": "^4.17.14",

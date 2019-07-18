@@ -12,7 +12,10 @@ exports.getServer = function (www) {
         allowedOrigins: [
             '*.gstatic.com'
         ]
-    }));
+    }), function (req, res, next) {
+        console.log('[REQ]', req.method, req.ip, req.originalUrl, req.get('Range'), req.get('Origin'));
+        next();
+    });
 
     app.get('/random.m3u8', async function (req, res) {
         res.header({

@@ -6,7 +6,7 @@ const spawn = require('await-spawn');
 const albumPath = path.join(__dirname, 'album.jpg');
 const videoExts = ['.mp4', '.mkv'];
 const audioExts = ['.mp3', '.m4a'];
-const mediaEncodeParams = '-c:v libx264 -tune stillimage -crf 27 -profile:v high -level 4.1 -pix_fmt yuv420p -c:a aac -ac 1 -strict -2 -b:a 192k'.split(/\s+/);
+const mediaEncodeParams = '-vn -s 64x64 -r 5 -c:v libx264 -tune stillimage -crf 27 -profile:v high -level 4.1 -pix_fmt yuv420p -c:a aac -ac 1 -strict -2 -b:a 192k'.split(/\s+/);
 
 exports.generate = async function (sourceDir, targetDir) {
     let files = await fse.readdir(sourceDir);

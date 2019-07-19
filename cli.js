@@ -2,57 +2,56 @@ const yargs = require('yargs');
 const { generate } = require('./generate');
 const { getServer } = require('./server');
 
-yargs.command(
-    'generate',
+yargs.option('verbose', {
+    boolean: true,
+    default: false
+}).command(
+    'generate <source> <target>',
     'generate m3u8 files',
     {
-        source: {
-            alias: 's'
+        type: {
+            alias: 't',
+            choices: ['mpegts', 'fmp4'],
+            default: 'mpegts'
         },
-        target: {
-            alias: 't'
+        audioOnly: {
+            alias: 'a',
+            boolean: true,
+            default: false
+        },
+        singleFile: {
+            alias: 's',
+            boolean: true,
+            default: false
         }
     },
     handleGenerate
-);
-
-yargs.command(
-    'serve',
+).command(
+    'serve <www>',
     'Start server',
     {
         port: {
             alias: 'p',
+            number: true,
             default: 8000
         },
-        www: {
-            alias: 'w'
+        cors: {
+            alias: 'c',
+            boolean: true,
+            default: false
         }
     },
     handleServe
-);
+).argv;
 
-yargs.option('verbose', {
-    alias: 'v',
-    default: false
-}).argv;
 
-async function handleGenerate({source, target}) {
-    if (!source || !target) {
-        throw new Error('Source and Target are required');
-    }
-    await generate(source, target);
+
+async function handleGenerate({source, target, type, audioOnly, singleFile, verbose}) {
+    await generate(source, target, {type, audioOnly, singleFile, verbose});
 }
 
-function handleServe({port, www}) {
-    port = parseInt(port, 10);
-    if (isNaN(port) || port < 1) {
-        throw new Error('Port is illegal');
-    }
-    if (!www) {
-        throw new Error('web dir is required');
-    }
-
-    getServer(www).listen(port, function () {
-        console.log('server is running');
+function handleServe({port, www, verbose, cors}) {
+    getServer(www, {verbose, cors}).listen(port, function () {
+        console.log('server is running on ' + port);
     });
 }

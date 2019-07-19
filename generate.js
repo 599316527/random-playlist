@@ -21,9 +21,7 @@ exports.generate = async function (sourceDir, targetDir, options) {
         let file = files[i];
         let {command, parameters, key} = getCommand(file, targetDir, options);
         keyNameMapping[key] = path.basename(file, path.extname(file));
-        if (!options.singleFile) {
-            await fse.ensureDir(path.join(targetDir, key));
-        }
+        await fse.ensureDir(path.join(targetDir, key));
         console.log(['Running\t', command].concat(parameters).join(' '));
         let promise = spawn(command, parameters, spawnOptions);
         if (options.verbose) {
@@ -39,7 +37,18 @@ exports.generate = async function (sourceDir, targetDir, options) {
             process.exit(err.code);
         }
     }
-    await fse.writeJSON(path.join(targetDir, 'metadata.json'), {keyNameMapping});
+    let metadataFile = path.join(targetDir, 'metadata.json');
+    let metadata = {};
+    try {
+        let result = await fse.readJSON(metadataFile);
+        if (!result.keyNameMapping) result.keyNameMapping = {};
+        Object.assign(result.keyNameMapping, keyNameMapping);
+        metadata = result;
+    }
+    catch (err) {
+        metadata = {keyNameMapping};
+    }
+    await fse.writeJSON(metadataFile, metadata);
 };
 
 function getCommand(file, targetDir, {type, audioOnly, singleFile}) {
@@ -66,18 +75,15 @@ function getCommand(file, targetDir, {type, audioOnly, singleFile}) {
         '-hls_segment_type', type
     ];
     let extname = getExtByType(type);
-    let segmentFilename;
+    let segmentFilename = `part%03d.${extname}`;
     if (singleFile) {
-        segmentFilename = path.join(targetDir, `${key}.${extname}`);
+        segmentFilename = `single.${extname}`;
         outputParams = outputParams.concat(['-hls_flags', 'single_file']);
     }
-    else {
-        segmentFilename = path.join(targetDir, key, `part%03d.${extname}`);
-        outputParams = outputParams.concat(['-hls_base_url', `${key}/`]);
-    }
+    segmentFilename = path.join(targetDir, key, segmentFilename);
     outputParams = outputParams.concat([
         '-hls_segment_filename', segmentFilename,
-        '-f', 'hls', `${targetPath}.m3u8`
+        '-f', 'hls', path.join(targetDir, key, 'entry.m3u8')
     ]);
 
     return {

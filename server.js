@@ -34,27 +34,26 @@ exports.getServer = function (www, options) {
 
 
 async function combinePlaylist(www) {
-    let keyNameMapping = {};
-    try {
-        let result = await fse.readJSON(path.join(www, 'metadata.json'));
-        keyNameMapping = result.keyNameMapping || {};
-    }
-    catch (err) {};
-    let files = await fse.readdir(www);
-    files = files.filter(file => !file.startsWith('.') && file.endsWith('.m3u8'))
-            .map(file => path.join(www, file));
-    files = shuffle(files);
+    let {keyNameMapping = {}} = await fse.readJSON(path.join(www, 'metadata.json'));
+    let keys = shuffle(Object.keys(keyNameMapping));
     let result = [];
-    for (let i = 0; i < files.length; i++) {
-        let key = path.basename(files[i], path.extname(files[i]));
+    for (let i = 0; i < keys.length; i++) {
+        let key = keys[i];
         let name = keyNameMapping[key];
-        let content = await fse.readFile(files[i], 'utf8');
+        let file = path.join(www, key, 'entry.m3u8');
+        let content = await fse.readFile(file, 'utf8');
         let lines = content.trim().split('\n');
 
         let count = 0;
         lines = lines.map(function (line) {
-            if (line.startsWith('#EXTINF:') && line.endsWith(',')) {
+            if (name && line.startsWith('#EXTINF:') && line.endsWith(',')) {
                 line += `${name} part${count++}`;
+            }
+            if (line.endsWith('.ts') || line.endsWith('.m4s')) {
+                line = `${key}/${line}`;
+            }
+            if (line === '#EXT-X-MAP:URI="init.mp4"') {
+                line = `#EXT-X-MAP:URI="${key}/init.mp4"`;
             }
             return line;
         });
@@ -63,7 +62,7 @@ async function combinePlaylist(www) {
             result = result.concat(lines.slice(0, 4));
         }
         result = result.concat(lines.slice(4, -1));
-        if (i === files.length - 1) {
+        if (i === keys.length - 1) {
             result = result.concat(lines.slice(-1));
         }
         else {

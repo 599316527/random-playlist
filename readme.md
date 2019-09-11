@@ -8,3 +8,8 @@ Random Playlist
 3. Request m3u8
    `http://127.0.0.1:8000/random.m3u8`
 
+
+## Why?
+
+I uses [hass time trigger](https://www.home-assistant.io/docs/automation/trigger/#time-trigger) and [hass media player](https://www.home-assistant.io/components/media_player/) with Google Home Mini to give myself a morning call. Instead of same ringtone everyday, I made this project to serve lots of songs as a random playlist which is sent to Google Home Mini to play. 
+
